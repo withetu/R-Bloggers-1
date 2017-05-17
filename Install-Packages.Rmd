@@ -1,0 +1,609 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+
+if(!require(devtools)){
+install.packages("devtools")
+}
+library(devtools)
+
+#-----------------------------------
+
+install_github("skardhamar/rga", force = TRUE)  #not installed in new system
+
+#-----------------------------------
+if(!require(httr)){
+  install.packages("httr")
+}
+library(httr)
+#-----------------------------------
+  if(!require(xlsx)){
+install.packages("xlsx")
+  }
+library(xlsx)
+#-----------------------------------
+    if(!require(RODBC)){
+install.packages("RODBC")
+    }
+library(RODBC)
+#-----------------------------------
+      if(!require(RMySQL)){
+install.packages("RMySQL")
+      }
+library(RMySQL)
+#-----------------------------------
+        if(!require(svglite)){
+install.packages("svglite")
+        }
+library(svglite)
+#-----------------------------------
+      
+vignette("fonts")
+          
+#-----------------------------------
+            if(!require(stringi)){
+install.packages("stringi")
+            }
+library(stringi)
+#-----------------------------------
+              if(!require(caret)){
+install.packages("caret")
+              }
+library(caret)
+#-----------------------------------
+                if(!require(stringr)){
+install.packages("stringr")
+                }
+library(stringr)
+#-----------------------------------
+if(!require(chron)){
+                  install.packages("chron")
+}
+library(chron)
+#-----------------------------------
+if(!require(Hmisc)){
+  install.packages("Hmisc")
+}
+library(Hmisc)
+#-----------------------------------
+if(!require()){
+  install.packages("rapportools")
+}
+library()
+#-----------------------------------
+if(!require(rapportools)){
+  install.packages("outliers")
+}
+library(rapportools)
+#-----------------------------------
+if(!require(googlesheets)){
+  install.packages("googlesheets")
+}
+library(googlesheets)
+#-----------------------------------
+if(!require(psych)){
+install.packages("psych")
+}
+library(psych)
+#-----------------------------------
+if(!require(ez)){
+  install.packages("ez")
+}
+library(ez)
+#-----------------------------------
+if(!require(twitteR)){
+  install.packages("twitteR")
+}
+library(twitteR)
+#-----------------------------------
+if(!require(SchedulerR)){
+  install.packages("SchedulerR")
+}
+library(SchedulerR)
+#-----------------------------------
+if(!require(rjson)){
+  install.packages("rjson")
+}
+library(rjson)
+#-----------------------------------
+if(!require(tabulizer)){
+  install.packages("tabulizer")
+}
+library(tabulizer)
+#-----------------------------------
+if(!require(XML)){
+  install.packages("XML")
+}
+library(XML)
+#-----------------------------------
+if(!require(RCurl)){
+  install.packages("RCurl")
+}
+library(RCurl)
+#-----------------------------------
+if(!require(bitops)){
+  install.packages("bitops")
+}
+library(bitops)
+#-----------------------------------
+if(!require(wordcloud2)){
+  install.packages("wordcloud2")
+}
+library(wordcloud2)
+#-----------------------------------
+if(!require(webshot)){
+  install.packages("webshot")
+}
+library(webshot)
+#-----------------------------------
+if(!require(sqldf)){
+  install.packages("sqldf")
+}
+library(sqldf)
+#-----------------------------------
+if(!require(PASWR)){
+  install.packages("PASWR")
+}
+library(PASWR)
+#-----------------------------------
+if(!require(rvest)){
+  install.packages("rvest")
+}
+library(rvest)
+#-----------------------------------
+if(!require(corrgram)){
+  install.packages("corrgram")
+}
+library(corrgram)
+#-----------------------------------
+if(!require(RGoogleAnalytics)){
+  install.packages("RGoogleAnalytics")
+}
+library(RGoogleAnalytics)
+#-----------------------------------
+if(!require(shiny)){
+install.packages("shiny")
+}
+library(shiny)
+#-----------------------------------
+if(!require(rsconnect)){
+  install.packages("rsconnect")
+}
+library(rsconnect)
+#-----------------------------------
+if(!require(ggplot2)){
+  install.packages("ggplot2")
+}
+library(ggplot2)
+#-----------------------------------
+if(!require(dplyr)){
+  install.packages("dplyr")
+}
+library(dplyr)
+#-----------------------------------
+if(!require(ggmap)){
+  install.packages("ggmap")
+}
+library(ggmap)
+#-----------------------------------
+if(!require(pdftools)){
+  install.packages("pdftools")
+}
+library(pdftools)
+#-----------------------------------
+if(!require(tree)){
+  install.packages("tree")
+}
+library(tree)
+#-----------------------------------
+if(!require(ROCR)){
+  install.packages("ROCR")
+}
+library(ROCR)
+#-----------------------------------
+if(!require(rpart.plot)){
+  install.packages("rpart.plot")
+}
+library(rpart.plot)
+#-----------------------------------
+if(!require(googleAnalyticsR)){
+  install.packages("googleAnalyticsR")
+}
+library(googleAnalyticsR)
+#-----------------------------------
+if(!require(xml2)){
+  install.packages("xml2")
+}
+library(xml2)
+#-----------------------------------
+if(!require(searchConsoleR)){
+  install.packages("searchConsoleR")
+}
+library(searchConsoleR)
+#-----------------------------------
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+}
+library(tidyverse)
+#-----------------------------------
+if(!require(stringr)){
+  install.packages("stringr")
+}
+library(stringr)
+#-----------------------------------
+if(!require(forcats)){
+  install.packages("forcats")
+}
+library(forcats)
+#-----------------------------------
+if(!require(ggmap)){
+  install.packages("ggmap")
+}
+library(ggmap)
+#-----------------------------------
+if(!require(rvest)){
+  install.packages("rvest")
+}
+library(rvest)
+#-----------------------------------
+if(!require(extrafont)){
+  install.packages("extrafont")
+}
+library(extrafont)
+#-----------------------------------
+if(!require(plotly)){
+  install.packages("plotly")
+}
+library(plotly)
+#-----------------------------------
+
+
+#-----------------------------------
+if(!require(zoo)){
+  install.packages("zoo")
+}
+library(zoo)
+
+#-----------------------------------
+if(!require(raster)){
+  install.packages("raster")
+}
+library(raster)
+
+#-----------------------------------
+if(!require(rgdal)){
+  install.packages("rgdal")
+}
+library(rgdal)
+
+#-----------------------------------
+install.packages("colourpicker")
+install.packages("devtools")
+devtools::install_github("daattali/colourpicker")
+
+#-----------------------------------
+if(!require(MASS)){
+  install.packages("MASS")
+}
+library(MASS)
+
+#-----------------------------------
+if(!require(scatterplot3d)){
+  install.packages("scatterplot3d")
+}
+library(scatterplot3d)
+
+#-----------------------------------
+if(!require(rgl)){
+  install.packages("rgl")
+}
+library(rgl)
+
+#-----------------------------------
+if(!require(LSD)){
+  install.packages("LSD")
+}
+library(LSD)
+
+#-----------------------------------
+if(!require(BatchGetSymbols)){
+  install.packages(BatchGetSymbols)
+}
+library(BatchGetSymbols)
+
+#-----------------------------------
+if(!require(extrafont)){
+  install.packages("extrafont")
+}
+library(extrafont)
+font_import()
+loadfonts()
+fonts()
+loadfonts(device="win")
+
+#-----------------------------------
+if(!require(wordcloud)){
+  install.packages("wordcloud")
+}
+library("wordcloud")
+
+#-----------------------------------
+if(!require(tm)){
+  install.packages("tm")
+}
+library("tm")
+
+#-----------------------------------
+if(!require(RDSTK)){
+  install.packages("RDSTK")
+}
+library(RDSTK)
+
+#-----------------------------------
+if(!require(nmle)){
+  install.packages("nmle")
+}
+library(nmle)
+
+#-----------------------------------
+if(!require(tabplot)){
+  install.packages("tabplot")
+}
+library(tabplot)
+
+#-----------------------------------
+if(!require(ROAuth)){
+  install.packages("ROAuth")
+}
+library(ROAuth)
+
+#-----------------------------------
+if(!require(text2vec)){
+  install.packages("text2vec")
+}
+library(text2vec)
+
+#-----------------------------------
+if(!require(glmnet)){
+  install.packages("glmnet")
+}
+library(glmnet)
+
+#-----------------------------------
+if(!require(ggrepel)){
+  install.packages("ggrepel")
+}
+library(ggrepel)
+
+#-----------------------------------
+if(!require(SnowballC)){
+  install.packages("SnowballC")
+}
+library(SnowballC)
+
+#-----------------------------------
+if(!require(moments)){
+  install.packages("moments")
+}
+library(moments)
+
+#-----------------------------------
+if(!require(shinydashboard)){
+  install.packages("shinydashboard")
+}
+library(shinydashboard)
+
+#-----------------------------------
+if(!require(fields)){
+  install.packages("fields")
+}
+library(fields)
+
+#-----------------------------------
+if(!require(plot3D)){
+  install.packages("plot3D")
+}
+library(plot3D)
+
+#-----------------------------------
+if(!require(DMwR)){
+  install.packages("DMwR")
+}
+library(DMwR)
+
+#-----------------------------------
+if(!require(caretEnsemble)){
+  install.packages("caretEnsemble")
+}
+library(caretEnsemble)
+
+#-----------------------------------
+if(!require(pROC)){
+  install.packages("pROC")
+}
+library(pROC)
+
+#-----------------------------------
+if(!require(tm)){
+  install.packages("tm")
+}
+library(tm)
+
+#-----------------------------------
+if(!require(jiebaR)){
+  install.packages("jiebaR")
+}
+library(jiebaR)
+
+#-----------------------------------
+if(!require(lmtest)){
+  install.packages("lmtest")
+}
+library(lmtest)
+
+#-----------------------------------
+if(!require(SemiPar)){
+  install.packages("SemiPar")
+}
+library(SemiPar)
+
+#-----------------------------------
+if(!require(Hmisc)){
+  install.packages("Hmisc")
+}
+library(Hmisc)
+
+#-----------------------------------
+if(!require(qgraph)){
+  install.packages("qgraph")
+}
+library(qgraph)
+
+#-----------------------------------
+if(!require(testthat)){
+  install.packages("testthat ")
+}
+library(testthat)
+
+#-----------------------------------
+if(!require(animation)){
+  install.packages("animation")
+}
+library(animation)
+
+#-----------------------------------
+if(!require(Quandl)){
+  install.packages("Quandl")
+}
+library(Quandl)
+
+#-----------------------------------
+if(!require(forecast)){
+  install.packages("forecast")
+}
+library(forecast)
+
+#-----------------------------------
+if(!require(dygraphs)){
+  install.packages("dygraphs")
+}
+library(dygraphs)
+
+#-----------------------------------
+if(!require(pastecs)){
+  install.packages("pastecs")
+}
+library(pastecs)
+
+#-----------------------------------
+if(!require(mvoutlier)){
+  install.packages("mvoutlier")
+}
+library(mvoutlier)
+
+#-----------------------------------
+if(!require(googleVis)){
+  install.packages("googleVis")
+}
+library(googleVis)
+
+#-----------------------------------
+if(!require(rCharts)){
+  install.packages("rCharts")
+}
+library(rCharts)
+
+#-----------------------------------
+if(!require(sankeyD3)){
+  install.packages("sankeyD3")
+}
+library(sankeyD3)
+
+#-----------------------------------
+if(!require(rtweet)){
+  install.packages("rtweet")
+}
+library(rtweet)
+
+#-----------------------------------
+if(!require(dplyr)){
+  install.packages("dplyr")
+}
+library(dplyr)
+
+#-----------------------------------
+if(!require(magick)){
+  install.packages("magick")
+}
+library(magick)
+
+#-----------------------------------
+if(!require(httr)){
+  install.packages("httr")
+}
+library(httr)
+
+#-----------------------------------
+if(!require(stringr)){
+  install.packages("stringr")
+}
+library(stringr)
+
+#-----------------------------------
+if(!require(purrr)){
+  install.packages("purrr")
+}
+library(purrr)
+
+#-----------------------------------
+if(!require(hrbrthemes)){
+  install.packages("hrbrthemes")
+}
+library(hrbrthemes)
+
+#-----------------------------------
+if(!require(tidytext)){
+  install.packages("tidytext")
+}
+library(tidytext)
+
+#-----------------------------------
+if(!require(wordcloud)){
+  install.packages("wordcloud")
+}
+library(wordcloud)
+
+#-----------------------------------
+if(!require(ggalt)){
+  install.packages("ggalt")
+}
+library(ggalt)
+
+#-----------------------------------
+if(!require(imager)){
+  install.packages("imager")
+}
+library(imager)
+
+#-----------------------------------
+if(!require(bmp)){
+  install.packages("bmp")
+}
+library(bmp)
+
+#-----------------------------------
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
