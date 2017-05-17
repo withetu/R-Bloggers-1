@@ -1,0 +1,82 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ==============================================
+
+# Make ggplot2 purrr
+# https://www.r-bloggers.com/make-ggplot2-purrr/
+
+# ==============================================
+
+
+
+# To illustrate this idea, let’s use the data from the Penn World Tables 9.0. The easiest way to get this data is to install the package called pwt9 with:
+install.packages("pwt9")
+install.packages("pwt9")
+library(pwt9)
+
+# load the data
+data("pwt9.0")
+
+# Now, let’s load the needed packages. I am also using ggthemes which makes themeing your ggplots very easy. I’ll be making Tufte-style plots.
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+library(purrr)
+library(pwt9)
+
+
+# First let’s select a list of countries:
+country_list <- c("France", "Germany", "United States of America", "Luxembourg", "Switzerland", "Greece")
+
+small_pwt <- pwt9.0 %>%
+  filter(country %in% country_list)
+
+#order the countries in the data frame
+small_pwt <- small_pwt %>%
+  mutate(country = factor(country, levels = country_list, ordered = TRUE))
+
+# Now when you want to plot the same variable by countries, the usual way to do this is with one of facet_wrap() or facet_grid():
+g <- ggplot(data = small_pwt)
+g + theme_tufte() +
+  geom_line(aes(y = avh, x = year)) +
+  facet_wrap(~country)
+
+g + theme_tufte() + 
+  geom_line(aes(y = avh, x = year)) +
+  facet_grid(country~.)
+
+# use of dplyr::do()
+plots <- small_pwt %>%
+  group_by(country) %>%
+  do(plot = ggplot(data = .) + theme_tufte() +
+       geom_line(aes(y = avh, x = year))+
+       ggtitle(unique(.$country)) + 
+       ylab("Year") +
+       xlab("Average annual hours worked by persons engaged"))
+
+print(plots)
+
+# Here are the final lines that use purrr::map2() to save all these plots at once inside your working directory:
+file_names <- paste0(country_list, ".pdf")
+map2(file_names, plots$plot, ggsave)
+
+
+  
+
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
