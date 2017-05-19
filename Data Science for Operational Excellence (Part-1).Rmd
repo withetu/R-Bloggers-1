@@ -1,0 +1,70 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ===============================================================================================
+
+# Data Science for Operational Excellence (Part-1)
+# http://www.r-exercises.com/2017/04/06/data-science-for-operational-excellence-part-1-exercises/
+
+# ===============================================================================================
+
+
+# Load packages lpSolve and igraph. Then, take a look at lp.assign to see how it works.
+library(lpSolve)
+library(igraph)
+
+# Create a matrix representing the cost related to assign 4 tasks(rows) to 4 workers(cols) by generating integer random numbers between 50 and 100, with replacement. In order to make this exercise reproducible, define seed as 1234.
+set.seed(1234)
+
+assign.costs <- matrix(sample(50:100, 16, replace = T), ncol = 4 )
+
+# Who should be assign to each task to obtain all the work done at minimal cost?
+x <- lp.assign(assign.costs)
+x$solution
+
+# Based on the resource allocation plan, how much we will spend to get all this work done?
+x$objval
+
+# Take a look at lp.transport to see how it works. Set up the cost matrix by generating integer random numbers between 0 and 1000, without replacement. Consider that will be 8 factories(rows) serving 5 warehouses(cols).
+set.seed(1234)
+transp.costs <- matrix(sample(0:1000, 40, replace = F), nrow = 8)
+transp.costs
+
+# Set up the offer constraint by generating integer random numbers between 50 and 300, without replacement.
+row.signs <- rep("<", 8)
+row.rhs <- sample(50:300, replace = F)
+row.rhs 
+
+# Set up the demand constraint by generating integer random numbers between 100 and 500, without replacement.
+col.signs <- rep (">", 5)
+col.rhs <- sample(100:500, 5, replace=F)
+col.rhs
+
+# Find out which factory will not use all its capacity at the optimal cost solution.
+sol <- lp.transport (transp.costs, "min", row.signs, row.rhs, col.signs, col.rhs, compute.sens=0)
+sol$solution
+
+# What is the cost associated to the optimal distribution?
+sol
+
+# Create adjacency matrix using your solution in order to create a graph using igraph package.
+AdjMatrix <- cbind(sol$solution, matrix(rep(0,8*3), ncol=3))
+AdjMatrix <- AdjMatrix / AdjMatrix
+graph <- graph_from_adjacency_matrix(AdjMatrix, mode = "direct", weighted = NULL)
+plot(graph)
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).

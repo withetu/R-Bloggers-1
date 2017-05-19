@@ -605,7 +605,18 @@ if(!require(ggthemes)){
 library(ggthemes)
 
 #-----------------------------------
+if(!require(lpSolve)){
+  install.packages("lpSolve")
+}
+library(lpSolve)
 
+#-----------------------------------
+if(!require(igraph)){
+  install.packages("igraph")
+}
+library(igraph)
+
+#-----------------------------------
 
 
 
