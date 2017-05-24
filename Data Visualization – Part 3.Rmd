@@ -1,0 +1,75 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ======================================================
+
+# Data Visualization – Part 3
+# https://www.r-bloggers.com/data-visualization-part-3/
+
+# ======================================================
+
+
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(scales)
+library(stringr)
+library(zoo)
+
+data <- read.csv("C:\\Users\\user\\Documents\\GitHub\\R-Bloggers-1\\data.csv")
+head(data)
+glimpse(data)
+
+
+# Trend – Line Chart
+
+p = ggplot(data, aes(x = Export.Country, y = Tonnes, group = 1))
+
+#poor vision
+p + geom_line(stat = 'identity') +
+  ggtitle('Aluminium Scrap Import Over Month') + 
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  xlab('') + ylab('')
+
+#better vision 
+p + geom_line(stat = 'identity') + 
+  ggtitle('In Tonnes Aluminium Scrap Import By Month in the India') +
+  theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(labels = comma)
+
+
+# Comparison – Line Chart
+
+p = ggplot(data, aes(x = Month, y = Tonnes, col = Export.Continent))
+
+p + geom_line(stat = 'identity') + 
+  ggtitle(paste('In Tonnes Aluminium Scrap Import By Month in the India')) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+#better vision 
+p = ggplot(data, aes(x = Month, y = Tonnes, group = 1))
+p + geom_line(stat = 'identity') +
+  ggtitle(paste('Continent - Aluminium Scrap Import by Month in India')) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  facet_wrap(~Export.Continent) +
+  scale_y_continuous(labels = comma)
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).

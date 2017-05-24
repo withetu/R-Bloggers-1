@@ -1,0 +1,187 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# =====================================================
+
+# Data Visualization – Part 2
+# https://www.r-bloggers.com/data-visualization-part-2/
+
+# =====================================================
+
+
+
+library(dplyr)
+library(ggplot2)
+
+# Load the economics data from ggplot2
+data(economics, package='ggplot2')
+
+# Take a look at the format of the data
+head(economics)
+
+# Create the plot
+ggplot(data = economics) +
+  geom_line(aes(x = date, y = unemploy))
+# Side Note: you could have achieved the same result by mapping the variables in the ggplot() function rather than in geom_line():
+ggplot(data = economics, aes(x = date, y = unemploy)) + geom_line()
+
+library(reshape2)
+library(lubridate)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(gridExtra)
+
+
+# The Scatterplot
+ 
+# The author of this chart was looking for a correlation between area and population.
+
+# Use the "midwest" data from ggplot2
+data("midwest", package="ggplot2")
+
+head(midwest)
+
+ggplot(data = midwest, aes(x = area, y = poptotal))+
+  geom_point()
+
+# Here’s version with some additional features
+ggplot(data = midwest, aes(x = area, y = poptotal)) +
+  geom_point(aes(col = state, size = popdensity)) +
+  geom_smooth(method = "loess", se = F) +
+  xlim(c(0, 0.1)) + 
+  ylim(c(0, 500000)) +
+  labs(subtitle = "Area Vs Population",
+       y = "Population",
+       x = "Area",
+       title = "Scatterplot",
+       caption = "Source: midwest")
+
+
+# The Density Plot
+
+# Density plots are a great way to see how data is distributed. They are similar to histograms in a sense, but show values in terms of percentage of the total.
+
+# Examine the mpg data set
+head(mpg)
+str(mpg)
+glimpse(mpg)
+
+g = ggplot(mpg, aes(cty))
+g + geom_density(aes(fill = factor(cyl)), alpha = 0.8) +
+  labs(title = "Density plot",
+       subtitle = "City Mileage Grouped by Number of cylinders",
+       caption = "Source: mpg",
+       x = "City Mileage",
+       fill = "# Cylinders")
+
+# How would you use your new knowledge to see the density by class instead of by number of cylinders? **Hint: ** g = ggplot(mpg, aes(cty)) has already been established.
+g + geom_density(aes(fill = factor(class)), alpha = 0.8) +  
+  labs(title = "Density plot",
+       subtitle = "City Mileage Grouped by Number of class",
+       caption = "Source: mpg",
+       x = "City Mileage",
+       fill = "Class")
+
+
+# The Histogram
+
+g = ggplot(mpg, aes(cty))
+g + geom_histogram(bins = 20) +
+  labs(title = "Histogram",
+       caption = "Source: mpg",
+       x = "City Mileage")
+
+
+# The Bar/Column Chart
+
+# Data Preparation
+freqtable <- table(mpg$manufacturer)
+df <- as.data.frame.table(freqtable)
+head(df)
+str(df)
+glimpse(df)
+
+#Set a theme
+theme_set(theme_classic())
+
+g <- ggplot(df, aes(Var1, Freq))
+g + geom_bar(stat = "identity", width = 0.5, fill = "tomato2") +
+  labs(title = "Bar Chart",
+       subtitle = "Manufacturer of vehicles",
+       caption = "Source: Frequency of Manufacturers from 'mpg' dataset") +
+  theme(axis.text.x = element_text(angle = 65, vjust = 0.6))
+
+# You may also notice that ggplot arranged all of the data in alphabetical order based off of the manufacturer. If you want to change the order, it’s best to use the reorder() function. This next chart will use the Freq and coord_flip() to orient the chart differently.
+g <- ggplot(df, aes(reorder(Var1,Freq), Freq))
+g + geom_bar(stat="identity", width = 0.5, fill="tomato2") + 
+      labs(title="Bar Chart", 
+           x = 'Manufacturer',
+           subtitle="Manufacturer of vehicles", 
+           caption="Source: Frequency of Manufacturers from 'mpg' dataset") +
+      theme(axis.text.x = element_text(angle=65, vjust=0.6)) + 
+  coord_flip()
+
+# Let's continue with bar charts - what if we wanted to see what hwy looked like by manufacturer and in terms of cyl?
+g = ggplot(mpg,aes(x=manufacturer,y=hwy,col=factor(cyl),fill=factor(cyl)))
+g + geom_bar(stat='identity', position='dodge') + 
+  theme(axis.text.x = element_text(angle=65, vjust=0.6))
+
+# facet_wrap()
+glimpse(mpg)
+theme_set(theme_bw())
+g = ggplot(mpg, aes(x = factor(cyl), y = hwy, col = factor(cyl), fill = factor(cyl)))
+g + geom_bar(stat = 'identity', position = 'dodge') +
+  facet_wrap(~ manufacturer)
+
+
+# Spatial Plots
+
+# This map is created with ggmap which utilizes Google Maps API.
+library(ggmap)
+library(ggalt)
+
+foco <- geocode("Fort Collins, CO") # get longitude and latitude
+
+# Get the Map ----------------------------------------------
+
+colo_map <- qmap("Colorado, United States", zoom = 7, source = "google")
+
+# Get Coordinates for Places ---------------------
+
+colo_places <- c("Fort Collins, CO",
+                    "Denver, CO",
+                    "Grand Junction, CO",
+                    "Durango, CO",
+                    "Pueblo, CO")
+
+places_loc <- geocode(colo_places) # get longitudes and latitudes
+
+# Plot Open Street Map -------------------------------------
+
+colo_map + geom_point(aes(x = lon, y = lat),
+                      data = places_loc,
+                      alpha = 0.7,
+                      size = 7,
+                      color = "tomato") +
+  geom_encircle(aes(x = lon, y = lat),
+                data = places_loc,
+                size = 2,
+                color = "blue")
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
