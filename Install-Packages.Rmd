@@ -617,7 +617,24 @@ if(!require(igraph)){
 library(igraph)
 
 #-----------------------------------
+if(!require(FactoMineR)){
+  install.packages("FactoMineR")
+}
+library(FactoMineR)
 
+#-----------------------------------
+if(!require(factoextra)){
+  install.packages("factoextra")
+}
+library(factoextra)
+
+#-----------------------------------
+if(!require(useful)){
+  install.packages("useful")
+}
+library(useful)
+  
+#-----------------------------------
 
 
 ```
