@@ -8,7 +8,7 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 ```{r}
-        # =============================================================================== #
+# =============================================================================== #
 
         # Data Visualization - Copper, Gold and Ten-Year Treasury Notes
         # https://rviews.rstudio.com/2017/04/12/copper-gold-and-ten-year-treasury-notes/
@@ -33,13 +33,55 @@ ten_year <- Quandl("FRED/DGS10", type = "xts", collapse = "daily", start_date = 
 # very simple with merge.xts but we want to eliminat NAs with na.locf().
 copper_gold_tenYear_merged <- na.locf(merge.xts(copper$Settle, gold$Settle, ten_year), formLast = TRUE)
 
-colnames <- 
+colnames(copper_gold_tenYear_merged) <- c("Copper", "Gold", "TenYear")
+
+# Create the ratio of prices. I multiply copper by 100 to synch with the scale used by 
+# Gundlach in his presentation.
+copper_gold_tenYear_merged$ratio <- (copper_gold_tenYear_merged$Copper*100)/copper_gold_tenYear_merged$Gold
 
 
+# create a new xts object to hold only those two time series
+tenYear_ratio <- merge(copper_gold_tenYear_merged$ratio, copper_gold_tenYear_merged$TenYear)
 
 
+# We use dygraphs to chart that one xts object, and call dySeries() for each of the columns to be included.
+dygraph(tenYear_ratio) %>%
+  dySeries("ratio") %>% 
+  dySeries("TenYear")
 
 
+dygraph(tenYear_ratio) %>% 
+  # Add the rollPeriod for smoothing.
+  dyRoller(rollPeriod = 3) %>% 
+  # Create two independent axes.
+  dyAxis("y", label = "USD") %>%
+  dyAxis("y2", label = "Percent (%)", independentTicks = TRUE) %>%
+  # Assign each time series to an axis.
+  dySeries("ratio", axis = 'y', label = "Copper/Gold (LHS)") %>% 
+  dySeries("TenYear", axis = 'y2', label = "10-Year % Yield (RHS)")
+
+
+# Calculate the rolling correlation between copper-gold and Treasury yields. 
+
+rolling_cor <- rollapply(tenYear_ratio, 90, 
+                                       function(x) cor(x[, 1], x[, 2], use = "pairwise.complete.obs"), 
+                                       by.column = FALSE)
+
+names(rolling_cor) <- "Copper/Gold 10-Year Correlation"
+
+dygraph(rolling_cor, main = "Rolling 90-day Correlation Copper-Gold & 10-Year Yield")
+
+avg <- round(mean(rolling_cor,  na.rm = T), 2)
+
+  mini <- round(min(rolling_cor,  na.rm = T), 2)
+ 
+  maxi <- round(max(rolling_cor,  na.rm = T), 2)
+  
+dygraph(rolling_cor, main = "Rolling 90-day correlations Copper-Gold & 10-Year Yield") %>% 
+  dyLimit(avg, color = 'purple') %>% 
+  dyLimit(mini, color = 'red') %>% 
+  dyLimit(maxi, color = 'blue') %>% 
+  dyEvent("2016-11-08", "Trump!", labelLoc = "bottom")
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
