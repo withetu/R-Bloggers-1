@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ==========================================
+
+# Emails from R
+# https://www.r-bloggers.com/emails-from-r/
+
+# ==========================================
+
+
+
+
+# Addresses
+add <- c("sandip@alcircle.com", "snandy@alcircle.com")
+subject <- "Testing"
+
+# construct message
+# opening
+start <- 'Hi, how are you?'
+
+# main content
+body <- 'sent almost exclusively from R'
+
+# signature
+sig <- 'And this is my signature'
+
+# paste components together
+Body <- paste(start, body, sig)
+
+# construct PowerShell code (*.ps1)
+email <- function(recip, subject, Body, filename, attachment = NULL, append){
+  file <- paste0(filename, ".ps1")
+  
+  write('$Outlook = New-Object -ComObject Outlook.Application', file, append = append)
+  write('$Mail = $Outlook.CreateItem(0)', file, append = TRUE)
+  write(paste0('$Mail.To = "', recip, '"'), file, append = TRUE)
+  write(paste0('$Mail.Subject = "', subject, '"'), file, append = TRUE)
+  write(paste0('$Mail.Body = "', Body, '"'), file, append = TRUE)
+  if(!is.null(attachment)){
+    write(paste0('$File = "', attachment, '"'), file, append = TRUE)
+    write('$Mail.Attachments.Add($File)', file, append = TRUE)
+  }
+  write('$Mail.Send()', file, append = TRUE)
+  if(append) write('', file, append = TRUE)
+}
+
+for(i in 1:length(add)){
+  file <- paste0("email", i, ".ps1")
+  att <- file.path(getwd(), "blabla.txt")
+  email(add[i], subject, Body, file, attachment = att) # with attachment
+  # email(add[i], subject, Body, file)                 # without attachment
+  # email(add[i], subject, Body, file, append = TRUE)  # multiple emails in a single PS file 
+}
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
