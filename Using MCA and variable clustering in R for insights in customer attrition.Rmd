@@ -1,0 +1,125 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ======================================================================================================
+
+# Using MCA and variable clustering in R for insights in customer attrition
+# https://www.r-bloggers.com/using-mca-and-variable-clustering-in-r-for-insights-in-customer-attrition/
+
+# ======================================================================================================
+
+
+
+
+
+
+require(caret)
+require(plyr)
+require(car)
+require(dplyr)
+require(reshape2)
+theme_set(theme_bw(12))
+
+
+
+
+churn <- read.table("C:\\Users\\user\\Documents\\GitHub\\R-Bloggers-1\\WA_Fn-UseC_-Telco-Customer-Churn.csv", sep = ",", header = TRUE)
+
+str(churn)
+
+## recode selected observations
+churn$MultipleLines <- as.factor(mapvalues(churn$MultipleLines, from = c("Fiber optic"), to=c("Fiberoptic")))
+churn$PaymentMethod <- as.factor(mapvalues(churn$PaymentMethod, from=c("Credit card (automatic)","Electronic check","Mailed check", "Bank transfer (automatic)"), to=c("Creditcard","Electronicheck","Mailedcheck","Banktransfer")))
+churn$Contract <- as.factor(mapvalues(churn$Contract, from = c("Month-to-month", "Two year", "One year"), to=c("MtM", "TwoYr", "OneYr")))
+
+cols_recode1 <- c(10:15)
+for(i in 1:ncol(churn[,cols_recode1])) {
+        churn[,cols_recode1][,i] <- as.factor(mapvalues
+                                              (churn[,cols_recode1][,i], from =c("No internet service"),to=c("No")))
+}
+
+# Besides, values in the SeniorCitizen column were entered as 0 and 1. Let’s recode this variable as “No” and “Yes”, respectively, for consistency.
+churn$SeniorCitizen <- as.factor(mapvalues(churn$SeniorCitizen, from = c("0", "1"), to=c("No", "Yes")))
+
+# Exclude the consumer id and total charges columns from data analysis.
+cols_drop <- c(1, 20)
+churn <- churn[,-cols_drop]
+
+# Let’s do summary statistics of the two numerical variables to see distribution of the data.
+summary(churn$MonthlyCharges)
+
+summary(churn$tenure)
+
+churn$tenure <- as.factor(car::recode(churn$tenure, "1:9 = 'ShortTenure'; 9:29 = 'MediumTenure'; else = 'LongTenure'"))
+                                 
+churn$MonthlyCharges <- as.factor(car::recode(churn$MonthlyCharges, "1:35 = 'LowCharge';35:70 = 'MediumCharge'; else = 'HighCharge'"))
+
+
+# It’s time to check for missing values in the pre-processed data set.
+mean(is.na(churn))
+
+# There are no missing values. How about the category levels of each variable?
+
+## check for factor levels in each column
+nfactors <- apply(churn, 2, function(x) nlevels(as.factor(x)))
+nfactors
+
+# Now, the data set is ready for analysis.
+
+
+## Partitioning the raw data into 70% training and 30% testing data sets
+inTrain <- createDataPartition(churn$Churn, p=0.7, list = FALSE)
+## set random seed to make reproducible results
+set.seed(324)
+training <- churn[inTrain,]
+testing <- churn[-inTrain,]
+
+# Check for the dimensions of the training and testing data sets
+dim(training) ; dim(testing)
+
+
+## Multiple Correspondence Analysis (MCA)
+require(FactoMineR)
+require(factoextra)
+
+res.mca <- MCA(training, quali.sup = c(17,19), graph = FALSE)
+fviz_mca_var(res.mca, repel = TRUE)
+
+
+
+
+## Variable Clustering
+
+require(ClustOfVar)
+# run variable clustering excluding the target variable (churn)
+variable_tree <- hclustvar(X.quali = training[,1:18])
+#plot the dendrogram of variable groups
+plot(variable_tree)
+
+# requesting for 25 bootstrap samplings and a plot
+stability(variable_tree, B=25)
+
+## cut the variable tree into 9(?) groups of variables
+clus <- cutreevar(variable_tree, 9)
+## print the list of variables in each cluster groups
+print(clus$var)
+
+
+## Descriptive statistics of customer churn
+
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
