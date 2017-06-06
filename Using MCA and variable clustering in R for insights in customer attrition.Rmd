@@ -114,6 +114,62 @@ print(clus$var)
 
 ## Descriptive statistics of customer churn
 
+# overall customer churn rate
+round(prop.table(table(training$Churn))*100,1)
+
+# Customer churn rate by demography, account and service information
+cols_aggr_demog <- c(1:4,6:7,9:14,16)
+variable <- rep(names(training[,cols_aggr_demog]),each=4)
+demog_counts=c()
+for(i in 1:ncol(training[,cols_aggr_demog])) {
+    demog_count <- ddply(training, .(training[,cols_aggr_demog][,i],training$Churn), "nrow")
+     names(demog_count) <- c("class","Churn","count")
+    demog_counts <- as.data.frame(rbind(demog_counts, demog_count))
+ }
+
+demog_churn_rate <- as.data.frame(cbind(variable, demog_counts))
+demog_churn_rate1 <- dcast(demog_churn_rate, variable + class ~ Churn, value.var="count")
+demog_churn_rate2 <- mutate(demog_churn_rate1, churn_rate=round((Yes/(No+Yes)*100)-26.5,1))
+demog <- as.data.frame(paste(demog_churn_rate2$variable,demog_churn_rate2$class))
+names(demog) <- c("Category")
+demog2 <- as.data.frame(cbind(demog,demog_churn_rate2))
+cols_aggr_nlev3 <- c(5,8,15,18)
+variable <- rep(names(training[,cols_aggr_nlev3]),each=6)
+nlev3_counts=c()
+for(i in 1:ncol(training[,cols_aggr_nlev3])) {
+    nlev3_count <- ddply(training, .(training[,cols_aggr_nlev3][,i],training$Churn), "nrow")
+     names(nlev3_count) <- c("class","Churn","count")
+    nlev3_counts <- as.data.frame(rbind(nlev3_counts, nlev3_count))
+ }
+
+nlev3_churn_rate <- as.data.frame(cbind(variable, nlev3_counts))
+nlev3_churn_rate1 <- dcast(nlev3_churn_rate, variable + class ~ Churn, value.var="count")
+nlev3_churn_rate2 <- mutate(nlev3_churn_rate1, churn_rate=round((Yes/(No+Yes)*100)-26.5,1))
+nlev3 <- as.data.frame(paste(nlev3_churn_rate2$variable,nlev3_churn_rate2$class))
+names(nlev3) <- c("Category")
+nlev3 <- as.data.frame(cbind(nlev3,nlev3_churn_rate2))
+variable <- rep("PaymentMethod",8)
+nlev4_count <- ddply(training, .(training[,17],training$Churn), "nrow")
+names(nlev4_count) <- c("class","Churn","count")
+nlev4_churn_rate <- as.data.frame(cbind(variable, nlev4_count))
+nlev4_churn_rate1 <- dcast(nlev4_churn_rate, variable + class ~ Churn, value.var="count")
+nlev4_churn_rate2 <- mutate(nlev4_churn_rate1, churn_rate=round((Yes/(No+Yes)*100)-26.5,1))
+nlev4 <- as.data.frame(paste(nlev4_churn_rate$variable4,nlev4_churn_rate2$class))
+names(nlev4) <- c("Category")
+nlev4 <- as.data.frame(cbind(nlev4,nlev4_churn_rate2))
+final_agg <- as.data.frame(rbind(demog2, nlev3, nlev4))
+
+ggplot(final_agg, aes(Category, churn_rate, color=churn_rate < 0)) +
+    geom_segment(aes(x=reorder(Category, -churn_rate), xend = Category,
+                     y = 0, yend = churn_rate), 
+                 size = 1.1, alpha = 0.7) +
+    geom_point(size = 2.5) +
+        theme(legend.position="none") +
+    xlab("Variable") +
+    ylab("Customer Churn (%)") +
+    ggtitle("Customer Attrition rate \n Difference from the overall average (%)") +
+    theme(axis.text.x=element_text(angle=45, hjust=1)) +
+    coord_flip()
 
 
 
