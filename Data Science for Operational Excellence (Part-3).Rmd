@@ -1,0 +1,122 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ==========================================================================
+
+# Data Science for Operational Excellence (Part-3)
+# https://www.r-bloggers.com/data-science-for-operational-excellence-part-3/
+
+# ==========================================================================
+
+
+# Load libraries: ggmap, fields, lpSolve, leaflet, dplyr, magrittr. Use the following vectors to create a new one called allCitiesAux: soyaCities <- c("Sapezal","Sorriso", "Nova Mutum", "Diamantino", "Cascavel") , transhipment <- c("Alto Araguaia", "Cascavel"), ports <- c("Santos", "Paranagua").
+library(ggmap)
+library(fields)
+library(lpSolve)
+library(leaflet)
+library(dplyr)
+library(magrittr)
+
+soyaCities <- c("Sapezal","Sorriso", "Nova Mutum", "Diamantino", "Cascavel")
+ranshipment <- c("Alto Araguaia", "Cascavel")
+ports <- c("Santos", "Paranagua")
+allCitiesAux <- c(soyaCities, ranshipment,ports)
+
+# Use the function geocode to collect latitude and longitude for all cities.
+vectorSizelat <- length(allCitiesAux)
+vectorSizelng <- length(allCitiesAux)
+for (i in 1:length(allCitiesAux)) {
+  position <- geocode(allCitiesAux[i])
+  vectorSizelat[i] <- position$lat
+  vectorSizelng[i] <- position$lon
+}
+
+# Create a data frame and with columns names: City, lat and lng.
+allCities <- cbind(allCitiesAux, vectorSizelat, vectorSizelng)
+colnames(allCities) <- c("City", "lat", "lng")
+allCities <- as.data.frame(allCities)
+allCities <- as.tbl(allCities) %>%
+  mutate(lat = as.numeric(as.character(lat)), lng = as.numeric(as.character(lng)))
+
+# Create a matrix that contains all the distance between all cities. We will use this in the lp.transportation function, so remember that rows must be offer points and columns demand points.
+distMatrix <- rdist(allCities[,2:3])
+colnames(distMatrix) <- allCitiesAux
+rownames(distMatrix) <- allCitiesAux
+cost.mat <- distMatrix[-c(6:9), 8:9]
+
+# Create row.signs, row.rhs, col.signs, col.rhs. For that, remember to set a seed equals to 123 and that all soya must be exported through ports. For the “right hand side” variables use random generated number. Port demands should be between 300 and 600. Soya production should be between 50 and 300.
+set.seed(1234)
+row.signs <- rep("=", length(soyaCities))
+row.rhs <- sample(50:300, length(soyaCities), replace = F) # offer
+col.signs <- rep(">", length(ports))
+col.rhs <- sample(300:600, length(ports), replace = F) # demand
+
+# Solve the transportation problem and change columns and row names to match the names from the cost matrix.
+sol <- lp.transport(cost.mat, "min", row.signs, row.rhs, col.signs, col.rhs)
+dimnames(sol$solution) <- dimnames(cost.mat)
+sol$solution
+
+# Create a list of data frames to store all segments presented in the solution. Example, one of this segments should be Sapezal to Santos.
+mydf2 <- list()
+for (i in 1:dim(sol$solution)[1]) {
+  for (j in 1:dim(sol$solution)[2]) {
+    if(sol$solution[i,j]!=0){
+      mydf2[[i]] <- data.frame(group = c(rownames(sol$solution)[i], colnames(sol$solution)[j]),
+                          lat = c(as.numeric(filter(allCities, City==rownames(sol$solution)[i])[1,2]),
+                                  as.numeric(filter(allCities, City==colnames(sol$solution)[j])[1,2])),
+                          long = c(as.numeric(filter(allCities, City==rownames(sol$solution)[i])[1,3]),
+                                   as.numeric(filter(allCities, City==colnames(sol$solution)[j])[1,3]))
+                          )
+    }
+  }
+}
+  
+
+# Create a map using leaflet and add lines for each segment based on the list of data frames created previously.
+map <- leaflet(allCities) %>% addTiles() %>% addMarkers(popup= ~City)
+for(i in 1:dim(sol$solution)[1]){
+  map <- addPolylines(map, data = mydf2[[i]], lng = ~long, lat = ~lat, group = ~group)
+}
+map
+
+# Create a list of data frames to store road routes extracted using the route function from ggmap.
+vectorCost<- NULL
+route_dfs <- list()
+vectorCost <- vector(length = dim(sol$solution)[1]*dim(sol$solution)[2])
+for (i in 1:dim(sol$solution)[1]) {
+  for (j in 1:dim(sol$solution)[2]) {
+    if(sol$solution[i,j]!=0){
+      from <- rownames(sol$solution)[i]
+      to <- colnames(sol$solution)[j]
+      route_df <- route(from, to, structure = "route")
+      route_df <- route_df[complete.cases(route_df),]
+      route_dfs[[i]] <- route_df
+      vectorCost <- c(vectorCost,lapply(route_df,sum)[2])
+    }
+  }
+}
+
+
+# Create a new map using leaflet that, instead of showing straight lines from origin to destination, shows road routes.
+map2 <- leaflet(allCities) %>% addTiles() %>% addMarkers(popup= ~City)
+for(i in 1:dim(sol$solution)[1]){
+  map2 <- addPolylines(map2, data = route_dfs[[i]], lng = ~lon, lat = ~lat)
+}
+map2
+
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).

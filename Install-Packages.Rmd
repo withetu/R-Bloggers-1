@@ -635,6 +635,12 @@ if(!require(useful)){
 library(useful)
   
 #-----------------------------------
+if(!require(fields)){
+  install.packages("fields")
+}
+library(fields)
+
+#-----------------------------------
 
 
 ```
