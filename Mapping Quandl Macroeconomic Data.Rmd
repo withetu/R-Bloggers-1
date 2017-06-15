@@ -1,0 +1,47 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# =========================================================================
+
+# Mapping Quandl Macroeconomic Data
+# https://rviews.rstudio.com/2017/05/10/mapping-quandl-macroeconomic-data/
+
+# =========================================================================
+
+
+
+
+library(Quandl)
+
+# Pass the code string to Quandl.
+China_GDPPC <- Quandl("WWDI/CHN_NY_GDP_PCAP_KN", type = 'xts') %>% 
+  # Add a nice column name
+  `colnames<-`("GDP Per Capita")
+
+# Take a look at the result.
+tail(China_GDPPC, n = 6)
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
