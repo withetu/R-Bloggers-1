@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# ==========================================================
+
+# Pretty histograms with ggplot2
+# https://www.r-bloggers.com/pretty-histograms-with-ggplot2/
+
+# ==========================================================
+
+
+
+
+set.seed(070510)
+d <- data.frame(x = rnorm(2000))
+
+head(d)
+
+# Basic Histogram
+library(ggplot2)
+
+ggplot(d, aes(x)) +
+  geom_histogram()
+
+# Adding Colour
+
+#we fill the bars with the same variable (x) but cut into multiple categories:
+ggplot(d, aes(x, fill = cut(x, 100))) +
+  geom_histogram()
+#Oh, ggplot2 has added a legend for each of the 100 groups created by cut! Get rid of this with show.legend = FALSE:
+ggplot(d, aes(x, fill = cut(x, 100))) +
+  geom_histogram(show.legend = FALSE)
+
+
+#here we’ll tweak the colours to range from blue to red, using "scale_fill_discrete"
+ggplot(d, aes(x, fill = cut(x, 100))) +
+  geom_histogram(show.legend = FALSE) +
+  scale_fill_discrete(h = c(240, 10))
+
+
+#Seems a little dark. Tweak chroma and luminance with c and l:Seems a little dark. Tweak chroma and luminance with c and l:
+ggplot(d, aes(x, fill = cut(x, 100))) +
+  geom_histogram(show.legend = FALSE) +
+  scale_fill_discrete(h = c(240, 10), c = 120, l = 70)
+
+
+#The final touches are to set the theme, add labels, and a title:
+ggplot(d, aes(x, fill = cut(x, 100))) +
+  geom_histogram(show.legend = FALSE) +
+  scale_fill_discrete(h = c(240, 10), c = 120, l = 70) +
+  theme_minimal() +
+  labs(x = "Variable X", y = "n") +
+  ggtitle("Histogram of X")
+
+
+#Now have fun tweaking the colours!
+p <- ggplot(d, aes(x, fill = cut(x, 100))) + 
+  geom_histogram(show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "Variable X", y = "n") +
+  ggtitle("Histogram of X")
+
+p + scale_fill_discrete(h = c(180, 360), c = 150, l = 80)
+p + scale_fill_discrete(h = c(90, 210), c = 30, l = 50)
+
+  
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
