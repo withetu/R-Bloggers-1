@@ -641,6 +641,12 @@ if(!require(fields)){
 library(fields)
 
 #-----------------------------------
+if(!require(ISLR)){
+  install.packages("ISLR")
+}
+library(ISLR)
+
+#-----------------------------------
 
 
 ```
