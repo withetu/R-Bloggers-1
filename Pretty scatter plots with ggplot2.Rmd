@@ -1,0 +1,128 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# =============================================================
+
+# Pretty scatter plots with ggplot2
+# https://www.r-bloggers.com/pretty-scatter-plots-with-ggplot2/
+
+# =============================================================
+
+
+set.seed(170513)
+n <- 200
+d <- data.frame(a = rnorm(n))
+d$b <- .4*(d$a + rnorm(n))
+
+head(d)
+tail(d)
+
+
+# Basic scatter plot
+library(ggplot2)
+
+ggplot(d, aes(a,b)) +
+  geom_point() +
+  theme_minimal()
+
+##  Shape and size
+ggplot(d, aes(a, b)) +
+  geom_point(shape = 16, size = 5) +
+  theme_minimal()
+
+##  Color
+ggplot(d, aes(a,b, color = a)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE) +
+  theme_minimal()
+
+d$pc <- predict(prcomp(~a+b, d))[,1]
+
+ggplot(d, aes(a, b, color = pc)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE) +
+  theme_minimal()
+
+ggplot(d, aes(a, b, color = pc)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE) +
+  theme_minimal()+
+  scale_color_gradient(low = "#F7D10E", high = "#27fce1")
+
+##  Transparency
+ggplot(d, aes(a, b, color = pc)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha = .4) +
+  theme_minimal()+
+  scale_color_gradient(low = "#F7D10E", high = "#03dfd8")
+
+
+###   This is fine most of the time. However, what if you have many points? Let’s try with 5,000 points:
+####    Simulate data
+set.seed(170513)
+n <- 5000
+d <- data.frame(a = rnorm(n))
+d$b <- .4 * (d$a + rnorm(n))
+
+head(d)
+tail(d)
+
+####    Compute first principal component
+d$pc <- predict(prcomp(~a+b, d))[,1]
+
+####    Plot
+ggplot(d, aes(a, b, color = pc)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha = .4) +
+  theme_minimal() +
+  scale_color_gradient(low = "#F7D10E", high = "#03dfd8")
+
+####    We’ve got another big mush. What if we take alpha down really low to .05?
+ggplot(d, aes(a, b, color = pc)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE, alpha = .05) +
+  theme_minimal() +
+  scale_color_gradient(low = "#F7D10E", high = "#03dfd8")
+
+####    Add bivariate density for each point
+d$density <- fields::interp.surface(
+  MASS::kde2d(d$a, d$b), d[,c("a", "b")])
+####    Now plot with alpha mapped to 1/density:
+ggplot(d, aes(a, b, color = pc, alpha = 1/density)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE) +
+  theme_minimal() +
+  scale_color_gradient(low = "#F7D10E", high = "#03dfd8")
+
+ggplot(d, aes(a, b, color = pc, alpha = 1/density)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE) +
+  theme_minimal() +
+  scale_color_gradient(low = "#F7D10E", high = "#03dfd8") +
+  scale_alpha(range = c(.05, .25))
+
+##  Bringing it together
+# Simulate data
+set.seed(170513)
+n <- 2000
+d <- data.frame(a = rnorm(n))
+d$b <- -(d$a + rnorm(n, sd = 2))
+
+# Add first principal component
+d$pc <- predict(prcomp(~a+b, d))[,1]
+
+# Add density for each point
+d$density <- fields::interp.surface(
+  MASS::kde2d(d$a, d$b), d[,c("a", "b")])
+
+# Plot
+ggplot(d, aes(a, b, color = pc, alpha = 1/density)) +
+  geom_point(shape = 16, size = 5, show.legend = FALSE) +
+  theme_minimal() +
+  scale_color_gradient(low = "#32aeff", high = "#f2aeff") +
+  scale_alpha(range = c(.25, .6))
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
