@@ -1,0 +1,40 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+#  ======================================================================
+
+#   5 ways to measure running time of R code
+#   https://www.r-bloggers.com/5-ways-to-measure-running-time-of-r-code/
+
+#  ======================================================================
+
+
+#   1. Using Sys.time
+sleep_for_a_minute <- function() {Sys.sleep(60)}
+
+start_time <- Sys.time()
+sleep_for_a_minute()
+end_time <- Sys.time()
+
+end_time - start_time
+
+
+#   2. Library tictoc
+Devtools::install_github("collectivemedia/tictoc")
+
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
