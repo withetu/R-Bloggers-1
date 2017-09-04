@@ -1,0 +1,121 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+#     =========================================================================================================
+
+#     Data Science for Business – Time Series Forecasting Part 1: EDA & Data Preparation
+#     https://www.r-bloggers.com/data-science-for-business-time-series-forecasting-part-1-eda-data-preparation/
+
+#     =========================================================================================================
+
+library(bindr)
+library(tidyverse)
+library(tidyquant)
+library(modelr)
+library(gridExtra)
+library(grid)
+
+retail <- read_csv("OnlineRetail.csv",
+                   col_types = cols(
+                     InvoiceNo = col_character(),
+                     StockCode = col_character(),
+                     Description = col_character(),
+                     Quantity = col_integer(),
+                     InvoiceDate = col_datetime("%m/%d/%Y %H:%M"),
+                     UnitPrice = col_double(),
+                     CustomerID = col_integer(),
+                     Country = col_character()
+                   )) %>%
+  mutate(day = parse_date(format(InvoiceDate, "%Y-%m-%d")),
+        day_of_week = wday(day, label = TRUE),
+        time = parse_time(format(InvoiceDate, "%H:%M")),
+        month = format(InvoiceDate, "%m"),
+        income = Quantity * UnitPrice,
+        income_return = ifelse(Quantity > 0, "income", "return"))
+
+
+p1 <- retail %>%
+  filter(Country == "United Kingdom") %>%
+  ggplot(aes(x = Country, fill = income_return)) +
+    geom_bar(alpha = 0.8) +
+    scale_fill_manual(values = palette_light()) +
+    theme_tq() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+    guides(fill = FALSE) +
+    labs(x = "")
+
+p2 <- retail %>%
+  filter(Country != "United Kingdom") %>%
+  ggplot(aes(x = Country, fill = income_return)) +
+    geom_bar(alpha = 0.8) +
+    scale_fill_manual(values = palette_light()) +
+    theme_tq() +
+    theme(legend.position = "right") +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+    labs(x = "",
+         fill = "")
+
+grid.arrange(p1, p2, widths = c(0.2, 0.8))
+
+retail %>%
+  ggplot(aes(x = day, color = income_return)) +
+    facet_grid(income_return ~ ., scales = "free") +
+    geom_freqpoly(bins = 100, size = 1, alpha = 0.8) +
+    scale_color_manual(values = palette_light()) +
+    theme_tq() +
+    guides(color = FALSE) +
+    labs(title = "Number of purchases/returns over time",
+         x = "")
+
+retail %>%
+  ggplot(aes(x = day, y = ..density.., color = income_return)) +
+    geom_freqpoly(size = 1, alpha = 0.8, bins = 100) +
+    scale_color_manual(values = palette_light()) +
+    theme_tq() +
+    labs(title = "Density of purchases/returns over time",
+         x = "",
+         color = "")
+
+retail %>%
+  group_by(day, income_return) %>%
+  summarise(sum_income = sum(income)) %>%
+  ggplot(aes(x = day, y = sum_income, color = income_return)) +
+    facet_grid(income_return ~ ., scales = "free") +
+    geom_ref_line(h = 0, colour = "grey") +
+    geom_line(size = 1, alpha = 0.8) +
+    scale_color_manual(values = palette_light()) +
+    theme_tq() +
+    guides(color = FALSE) +
+    labs(title = "Income/loss from transactions per day",
+         x = "",
+         y = "sum of income/losses",
+         color = "")
+
+retail %>%
+  group_by(time, income_return) %>%
+  summarise(sum_income = sum(income)) %>%
+  ggplot(aes(x = time, y = sum_income, color = income_return)) +
+    facet_grid(income_return ~ ., scales = "free") +
+    geom_ref_line(h = 0, colour = "grey") +
+    geom_line(size = 1, alpha = 0.8) +
+    scale_color_manual(values = palette_light()) +
+    theme_tq() +
+    guides(color = FALSE) +
+    labs(title = "Income from purchases/returns per time of day",
+         x = "time of day",
+         y = "sum of income/losses",
+         color = "")
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).

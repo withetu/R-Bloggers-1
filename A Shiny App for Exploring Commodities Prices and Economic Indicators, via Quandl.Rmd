@@ -1,0 +1,172 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+# A Shiny App for Exploring Commodities Prices and Economic Indicators, via Quandl
+# https://rviews.rstudio.com/2017/06/02/a-shiny-app-for-exploring-commodities-prices-and-economic-indicators-via-quandl/
+
+library(Quandl)
+library(dplyr)
+library(xts)
+library(lubridate)
+library(dygraphs)
+library(shiny)
+
+copper <- Quandl("CHRIS/CME_HG1", type = "xts", collapse = "daily",  
+                    start_date = "2012-01-01", end_date = "2017-02-28")
+
+gold <- Quandl("CHRIS/CME_GC1", type = "xts", collapse = "daily",  
+                    start_date = "2012-01-01", end_date = "2017-02-28")
+
+ten_year <- Quandl("FRED/DGS10", type = "xts", collapse = "daily",  
+                    start_date = "2012-01-01", end_date = "2017-02-28")
+
+copper_gold_tenYear_merged <- na.locf(merge.xts(copper$Settle, gold$Settle, ten_year),
+                                      formLast = TRUE)
+
+colnames(copper_gold_tenYear_merged ) <- c("Copper", "Gold", "TenYear")
+
+copper_gold_tenYear_merged$ratio <- (copper_gold_tenYear_merged$Copper*100)/copper_gold_tenYear_merged$Gold
+
+tenYear_ratio  <- merge(copper_gold_tenYear_merged$ratio, copper_gold_tenYear_merged$TenYear)
+
+dygraph(tenYear_ratio) %>%
+  dySeries("ratio") %>% 
+  dySeries("TenYear")
+
+dygraph(tenYear_ratio) %>% 
+  # Add the rollPeriod for smoothing.
+  dyRoller(rollPeriod = 3) %>% 
+  # Create two independent axes.
+  dyAxis("y", label = "USD") %>%
+  dyAxis("y2", label = "Percent (%)", independentTicks = TRUE) %>%
+  # Assign each time series to an axis.
+  dySeries("ratio", axis = 'y', label = "Copper/Gold (LHS)") %>% 
+  dySeries("TenYear", axis = 'y2', label = "10-Year % Yield (RHS)")
+
+rolling_cor <- rollapply(tenYear_ratio, 90, 
+                                       function(x) cor(x[, 1], x[, 2], use = "pairwise.complete.obs"), 
+                                       by.column = FALSE)
+
+names(rolling_cor) <- "Copper/Gold 10-Year Correlation"
+
+dygraph(rolling_cor, main = "Rolling 90-day Correlation Copper-Gold & 10-Year Yield")
+
+avg <- round(mean(rolling_cor,  na.rm = T), 2)
+
+  mini <- round(min(rolling_cor,  na.rm = T), 2)
+ 
+  maxi <- round(max(rolling_cor,  na.rm = T), 2)
+  
+dygraph(rolling_cor, main = "Rolling 90-day correlations Copper-Gold & 10-Year Yield") %>% 
+  dyLimit(avg, color = 'purple') %>% 
+  dyLimit(mini, color = 'red') %>% 
+  dyLimit(maxi, color = 'blue') %>% 
+  dyEvent("2016-11-08", "Trump!", labelLoc = "bottom")
+
+commodityChoices <- c(
+                  "Copper" = "CHRIS/CME_HG1",
+                  "WTI oil" = "FRED/DCOILWTICO",# 
+                  "Iron Ore" = "ODA/PIORECR_USD", # monthly
+                  "Platinum" = "LPPM/PLAT", 
+                  "Palladium" = "LPPM/PALL",
+                  "Silver" = "LBMA/SILVER")
+
+selectInput("commodity",
+            "Commodity",
+            choices = commodityChoices, 
+            selected = "Copper")
+
+econIndicatorChoices <- c(
+                  "10-Yr Yield" = "FRED/DGS10", # daily
+                  "US CPI" = "RATEINF/INFLATION_USA",# monthly
+                  "Japan CPI" = "RATEINF/INFLATION_JPN",
+                  "EU CPI" = "RATEINF/INFLATION_EUR")
+
+selectInput("econIndicator",
+            "Economic Indicator",
+            choices = econIndicatorChoices, 
+            selected = "10-yr Yield")
+
+dateRangeInput("dateRange",
+               "Date range",
+               start = "1990-01-01",
+               end   = "2016-12-31")
+
+ratio_indicator <- reactive({
+
+Quandl.api_key("your API key here")
+
+start_date <- format(input$dateRange[1])
+end_date <- format(input$dateRange[2])
+
+gold_code <- "CHRIS/CME_GC1.1"
+
+data_set_codes <- c(input$commodity, gold_code, input$econIndicator)
+
+quandlData<- data_set_codes  %>% 
+        # Pipe the datasets vector to Quandl via the map() function.
+        map(Quandl,
+            start_date = start_date,
+            end_date = end_date,
+            collapse = "monthly",
+            type = "xts")     %>%
+  
+  # Replace all NAs using map() and na.locf().
+        map(na.locf, formLast = TRUE) %>%
+  
+  # Merge to one xts object using map() and merge().
+        reduce(merge) %>% 
+        # Add nicer column names.
+        `colnames<-`(c(names(commodityChoices[commodityChoices == input$commodity]), 
+                            "Gold",
+                            names(econIndicatorChoices[econIndicatorChoices == input$econIndicator]))) 
+
+quandlData$ratio <- quandlData[,1]/quandlData[,2]
+
+ratio_indicator  <- merge(quandlData$ratio, quandlData[,3])
+
+# Add more general names.
+colnames(ratio_indicator) <- c("ratio","indicator")       
+
+return(ratio_indicator)
+})
+
+tagList()
+server <- function(input, output, session) {}
+
+dygraphOutput("ratio_indicator")
+
+output$ratio_indicator <- renderDygraph({
+  dygraph(ratio_indicator()) %>% 
+    
+  # Add the rollPeriod for smoothing.
+  dyRoller(rollPeriod = 3) %>% 
+    
+  # Create two independent axes, just we did in the Notebook.
+  dyAxis("y", label = "USD") %>%
+  dyAxis("y2", label = "Percent (%)", independentTicks = TRUE) %>%
+    
+  # Assign each time series to an axis. 
+  # Use the name from the name-value pair to create nice labels for each.  
+  dySeries("ratio", axis = 'y', 
+           label = paste(names(commodityChoices[commodityChoices == input$commodity]), 
+                         "/Gold (LHS)", sep = ""), color = "blue") %>% 
+  dySeries("indicator", axis = 'y2', 
+           label = paste(names(econIndicatorChoices[econIndicatorChoices == input$econIndicator]), 
+                         "(RHS)", sep = ""), color = "red")
+})
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
